@@ -230,7 +230,7 @@ Available slash commands in CLI:
 
 | Provider | Environment Variable | Model Example | Get Key |
 | :--- | :--- | :--- | :--- |
-| **Google Gemini** | `GEMINI_API_KEY` | `gemini/gemini-3.1-flash-lite`, `gemini/gemini-2.0-flash` | [Google AI Studio](https://aistudio.google.com/apikey) |
+| **Google Gemini** | `GEMINI_API_KEY` | `gemini/gemini-3.1-flash-lite`, `gemini/gemini-3.5-flash` | [Google AI Studio](https://aistudio.google.com/apikey) |
 | **OpenAI** | `OPENAI_API_KEY` | `gpt-4o`, `gpt-4o-mini` | [OpenAI Console](https://platform.openai.com/api-keys) |
 | **Anthropic** | `ANTHROPIC_API_KEY` | `claude-3-5-sonnet` | [Anthropic Console](https://console.anthropic.com/) |
 

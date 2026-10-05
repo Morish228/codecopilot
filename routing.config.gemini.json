@@ -1,9 +1,9 @@
 {
   "tiers": {
     "fast": "gemini/gemini-3.1-flash-lite",
-    "reasoning": "gemini/gemini-3.1-flash-lite",
-    "coding": "gemini/gemini-3.1-flash-lite",
-    "fallback": "gemini/gemini-3.1-flash-lite"
+    "reasoning": "gemini/gemini-3.5-flash",
+    "coding": "gemini/gemini-3.8-flash",
+    "fallback": "gemini/gemini-3.5-flash-lite"
   },
   "routes": {
     "file_search": {
@@ -39,8 +39,8 @@
   },
   "fallback_chain": [
     "gemini/gemini-3.1-flash-lite",
-    "gemini/gemini-2.5-flash",
-    "gemini/gemini-2.5-flash-lite",
-    "gemini/gemini-3-flash-preview"
+    "gemini/gemini-3.5-flash-lite",
+    "gemini/gemini-3.5-flash",
+    "gemini/gemini-3.8-flash"
   ]
 }

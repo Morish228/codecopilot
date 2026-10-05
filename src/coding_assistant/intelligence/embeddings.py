@@ -11,7 +11,14 @@ async def embed_texts(texts: Sequence[str]) -> list[list[float]]:
     settings = get_settings()
     if settings.embedding_model and texts:
         try:
-            response = await litellm.aembedding(model=settings.embedding_model, input=list(texts))
+            # Pin the output size to embedding_dimensions so it always matches the
+            # pgvector column (Vector(EMBEDDING_DIMENSIONS)) in db/models.py —
+            # providers such as Gemini otherwise return a much wider vector.
+            response = await litellm.aembedding(
+                model=settings.embedding_model,
+                input=list(texts),
+                dimensions=settings.embedding_dimensions,
+            )
             return [item["embedding"] for item in response.data]
         except Exception:
             pass
