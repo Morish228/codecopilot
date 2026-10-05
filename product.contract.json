@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Coding Assistant Product Contract",
+  "version": "0.1.0",
+  "phase": 0,
+  "architecture": {
+    "pattern": "hybrid_local_cli_hosted_control_plane",
+    "execution_model": "llm_structured_action_host_validation_execution",
+    "llm_direct_shell": false,
+    "sandbox_network_default": "disabled"
+  },
+  "ownership": {
+    "local_cli": [
+      "user_interaction",
+      "repository_access",
+      "approval_workflows",
+      "local_execution_experience"
+    ],
+    "hosted_control_plane": [
+      "authentication",
+      "policy_enforcement",
+      "telemetry",
+      "evaluations",
+      "model_routing",
+      "usage_tracking",
+      "budget_enforcement"
+    ]
+  },
+  "capabilities": {
+    "repository_inspection": { "supported": true, "mvp": true },
+    "code_search": { "supported": true, "mvp": true },
+    "code_explanation": { "supported": true, "mvp": true },
+    "refactoring": { "supported": true, "mvp": true },
+    "patch_generation": { "supported": true, "mvp": true },
+    "test_execution": { "supported": true, "mvp": true },
+    "documentation_generation": { "supported": true, "mvp": true },
+    "mcp_integrations": { "supported": true, "mvp": false, "opt_in": true }
+  },
+  "explicitly_unsupported": {
+    "automatic_deployment": true,
+    "automatic_git_push": true,
+    "arbitrary_internet_access": true,
+    "destructive_commands_without_approval": true
+  },
+  "approval_required_actions": [
+    "rm",
+    "git_reset",
+    "git_push",
+    "pip_install",
+    "npm_install",
+    "network_access",
+    "environment_modifications"
+  ],
+  "mvp_tools": [
+    "search_code",
+    "read_file",
+    "apply_patch",
+    "run_tests",
+    "lint",
+    "grep",
+    "approval_request"
+  ],
+  "deferred": [
+    "multi_agent_swarms",
+    "firecracker_microvms",
+    "full_multi_tenant_saas"
+  ],
+  "first_production_milestone": [
+    "local_cli",
+    "langgraph_runtime",
+    "litellm_routing",
+    "docker_sandbox",
+    "repository_indexing_tree_sitter_pgvector",
+    "approval_workflow",
+    "opentelemetry_langfuse_tracing",
+    "evaluation_harness"
+  ]
+}

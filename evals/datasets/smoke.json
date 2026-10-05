@@ -1,0 +1,32 @@
+[
+  {
+    "id": "grep-find-foo",
+    "category": "file_search",
+    "description": "grep should find a known symbol",
+    "workspace_fixture": "mini_project",
+    "tool": "grep",
+    "arguments": {"pattern": "hello_world"},
+    "expect_success": true,
+    "expect_output_contains": "hello_world"
+  },
+  {
+    "id": "read-main",
+    "category": "file_search",
+    "description": "read_file returns project entrypoint",
+    "workspace_fixture": "mini_project",
+    "tool": "read_file",
+    "arguments": {"path": "main.py"},
+    "expect_success": true,
+    "expect_output_contains": "hello_world"
+  },
+  {
+    "id": "lint-clean",
+    "category": "refactoring",
+    "description": "lint passes on valid python",
+    "workspace_fixture": "mini_project",
+    "tool": "lint",
+    "arguments": {"paths": ["."]},
+    "expect_success": true,
+    "expect_output_contains": "ok"
+  }
+]

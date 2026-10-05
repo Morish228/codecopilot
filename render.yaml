@@ -1,0 +1,40 @@
+services:
+  # FastAPI Backend Service
+  - type: web
+    name: codecopilot
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: codecopilot-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: codecopilot-redis
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false # User will configure this in the Render dashboard
+      - key: ROUTING_CONFIG_PATH
+        value: routing.config.gemini.json
+      - key: ROUTING_DEFAULT_MODEL
+        value: gemini/gemini-3.1-flash-lite
+      - key: LOG_LEVEL
+        value: INFO
+
+  # Redis Cache Service
+  - type: redis
+    name: codecopilot-redis
+    plan: free
+    ipAllowList: [] # Only accessible internally by services in this account
+
+databases:
+  # PostgreSQL Database (Render PostgreSQL supports pgvector natively)
+  - name: codecopilot-db
+    plan: free
+    databaseName: assistant
+    user: assistant

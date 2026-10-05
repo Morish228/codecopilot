@@ -1,0 +1,45 @@
+{
+  "tiers": {
+    "fast": "openai/gpt-4o-mini",
+    "reasoning": "openai/gpt-4o",
+    "coding": "anthropic/claude-sonnet-4-20250514",
+    "fallback": "openai/gpt-4o-mini"
+  },
+  "routes": {
+    "file_search": {
+      "low": "fast",
+      "medium": "fast",
+      "high": "fast"
+    },
+    "planning": {
+      "low": "fast",
+      "medium": "reasoning",
+      "high": "reasoning"
+    },
+    "refactoring": {
+      "low": "coding",
+      "medium": "coding",
+      "high": "coding"
+    },
+    "coding": {
+      "low": "coding",
+      "medium": "coding",
+      "high": "coding"
+    },
+    "debugging": {
+      "low": "reasoning",
+      "medium": "reasoning",
+      "high": "reasoning"
+    },
+    "fallback": {
+      "low": "fallback",
+      "medium": "fallback",
+      "high": "fallback"
+    }
+  },
+  "fallback_chain": [
+    "openai/gpt-4o-mini",
+    "anthropic/claude-3-5-haiku-latest",
+    "gemini/gemini-2.0-flash"
+  ]
+}
