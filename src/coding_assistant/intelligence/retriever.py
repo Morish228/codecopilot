@@ -45,27 +45,33 @@ class RepositoryRetriever:
             return []
 
         query_vec = (await embed_texts([query]))[0]
-        stmt = select(CodeSymbol).where(CodeSymbol.workspace_id == ws.id)
+        distance = CodeSymbol.embedding.cosine_distance(query_vec).label("distance")
+        stmt = select(CodeSymbol, distance).where(CodeSymbol.workspace_id == ws.id)
         if file_pattern:
             stmt = stmt.where(CodeSymbol.path.like(f"%{file_pattern}%"))
 
-        stmt = stmt.order_by(CodeSymbol.embedding.cosine_distance(query_vec)).limit(limit * 2)
+        stmt = stmt.order_by(distance).limit(limit * 2)
         result = await self._session.execute(stmt)
-        rows = list(result.scalars().all())
+        rows = list(result.all())
 
         q = query.lower()
         hits: list[SearchHit] = []
-        for row in rows:
-            keyword_boost = 0.0
-            if q in row.name.lower() or q in row.snippet.lower():
-                keyword_boost = 0.15
+        for row, dist in rows:
+            # pgvector cosine_distance is in [0, 2]: 0 = identical direction.
+            # Convert to a similarity in [-1, 1] so higher is a better match.
+            similarity = 1.0 - float(dist)
+            # Small boost when the raw query text appears in the symbol — a
+            # tiebreaker on top of the semantic score, not a replacement for it.
+            keyword_boost = (
+                0.15 if (q in row.name.lower() or q in row.snippet.lower()) else 0.0
+            )
             hits.append(
                 SearchHit(
                     path=row.path,
                     snippet=row.snippet[:300],
                     kind=row.kind,
                     name=row.name,
-                    score=keyword_boost,
+                    score=similarity + keyword_boost,
                 )
             )
 
