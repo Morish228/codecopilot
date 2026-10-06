@@ -20,6 +20,8 @@ APPROVAL_ACTION_TYPES = frozenset(
 def resolve_workspace_path(workspace_root: Path, relative_path: str) -> Path:
     root = workspace_root.resolve()
     target = (root / relative_path).resolve()
-    if not str(target).startswith(str(root)):
+    # Containment must be path-component aware: a raw prefix test would let
+    # a sibling like "/ws-secret" pass as being inside "/ws".
+    if target != root and root not in target.parents:
         raise ToolExecutionError(f"Path escapes workspace: {relative_path}")
     return target
