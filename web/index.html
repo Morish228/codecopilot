@@ -395,6 +395,14 @@
             border-left: 4px solid #38a169;
         }
 
+        .warning {
+            background: #fefcbf;
+            color: #744210;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #d69e2e;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -446,8 +454,8 @@
                     type="text" 
                     id="workspaceInput" 
                     class="workspace-input" 
-                    placeholder="e.g. /home/user/project"
-                    value="/tmp/workspace"
+                    placeholder="e.g. C:\Users\you\project or /home/user/project"
+                    value="C:\Users\moris\CodeCopilot"
                 >
                 <button class="set-workspace-btn" onclick="setWorkspace()">Set Workspace</button>
                 <div class="chat-status" id="workspaceStatus">Ready</div>
@@ -605,22 +613,46 @@
 
         // Poll run status
         async function pollRunStatus(runId, maxAttempts = 60) {
+            let approvalsHandled = 0;
             for (let i = 0; i < maxAttempts; i++) {
                 try {
                     const response = await fetch(`${API_BASE}/v1/runs/${runId}`);
                     if (!response.ok) throw new Error('Failed to fetch run status');
-                    
+
                     const data = await response.json();
-                    
+                    const status = (data.status || '').toUpperCase();
+
                     // Check for terminal states
-                    if (data.status === 'completed' || data.status === 'COMPLETED') {
+                    if (status === 'COMPLETED') {
                         return data;
                     }
-                    
-                    if (data.status === 'failed' || data.status === 'FAILED') {
+
+                    if (status === 'FAILED') {
                         return data;  // Return with error field
                     }
-                    
+
+                    if (status === 'CANCELLED') {
+                        return { ...data, error: data.error || 'Run was cancelled.' };
+                    }
+
+                    // Run is waiting on human approval — surface the pending
+                    // actions and feed the decision back, then keep polling.
+                    if (status === 'AWAITING_APPROVAL') {
+                        const approvals = await fetchApprovals(runId);
+                        for (const approval of approvals) {
+                            const approved = await requestApprovalDecision(approval);
+                            await fetch(`${API_BASE}/v1/runs/${runId}/approvals/${approval.id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ approved })
+                            });
+                            approvalsHandled++;
+                        }
+                        // Give the resumed run a moment to transition state.
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        continue;
+                    }
+
                     // Still running - wait and retry
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 } catch (error) {
@@ -633,6 +665,30 @@
                 }
             }
             throw new Error('Request timeout');
+        }
+
+        // Fetch pending approvals for a run
+        async function fetchApprovals(runId) {
+            try {
+                const response = await fetch(`${API_BASE}/v1/runs/${runId}/approvals`);
+                if (!response.ok) return [];
+                const approvals = await response.json();
+                return Array.isArray(approvals) ? approvals : [];
+            } catch (error) {
+                console.error('Approval fetch error:', error);
+                return [];
+            }
+        }
+
+        // Ask the human to approve or reject a pending action. The UI is the
+        // only place with the user in view, so a native confirm is the gate.
+        async function requestApprovalDecision(approval) {
+            const command = approval.payload?.arguments?.command
+                || approval.payload?.arguments?.path
+                || JSON.stringify(approval.payload ?? {});
+            const label = `⚠️ Approval required\n\nAction: ${approval.action_type}\n\n${command}\n\nApprove this action?`;
+            addMessage('assistant', `<span class="warning">⚠️ Awaiting approval: <strong>${approval.action_type}</strong> — ${command}</span>`);
+            return window.confirm(label);
         }
 
         // Add message to chat
